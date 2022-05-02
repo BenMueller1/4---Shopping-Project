@@ -1,11 +1,40 @@
+from asyncore import read
 import csv
 import sys
-
+import pdb
+import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 
 TEST_SIZE = 0.4
 
+MONTH_TO_NUMBER = {
+    "Jan": 0,
+    "Feb": 1,
+    "Mar": 2,
+    "Apr": 3,
+    "May": 4,
+    "June": 5,
+    "Jul": 6,
+    "Aug": 7,
+    "Sep": 8,
+    "Oct": 9,
+    "Nov": 10,
+    "Dec": 11
+}
+
+VISITOR_TYPE_TO_NUMBER = {
+    "New_Visitor": 0,
+    "Other": 0, # should this be mapped to -1????
+    "Returning_Visitor": 1
+}
+
+BOOL_STRING_TO_NUMBER = {
+    "FALSE": 0,
+    "TRUE": 1
+}
+
+INT_COLS = [0, 2, 4, 10, 11, 12, 13, 14]
 
 def main():
 
@@ -29,6 +58,23 @@ def main():
     print(f"Incorrect: {(y_test != predictions).sum()}")
     print(f"True Positive Rate: {100 * sensitivity:.2f}%")
     print(f"True Negative Rate: {100 * specificity:.2f}%")
+
+
+def get_row_data(row):
+    """ Returns a list continaing all of the data in the given row (formatted numerically)"""
+    row_data = []
+    row_data.extend(row[0:10])
+    row_data.append(MONTH_TO_NUMBER[row[10]])
+    row_data.extend(row[11:15])
+    row_data.append(VISITOR_TYPE_TO_NUMBER[row[15]])
+    row_data.append(BOOL_STRING_TO_NUMBER[row[16]])
+    for i, entry in enumerate(row_data):  # change strings to ints and floats
+        if type(entry) == str:
+            if i in INT_COLS:  # these cols are the ones that should be ints
+                row_data[i] = int(entry)
+            else:  # it should be a float
+                row_data[i] = float(entry)
+    return row_data
 
 
 def load_data(filename):
@@ -59,7 +105,16 @@ def load_data(filename):
     labels should be the corresponding list of labels, where each label
     is 1 if Revenue is true, and 0 otherwise.
     """
-    raise NotImplementedError
+    labels = []  # 1 if Revenue is true, 0 otherwise
+    evidence = []
+    with open(filename) as f:
+        reader = csv.reader(f)   # reader is an iterator that iterates over the lines in f
+        next(reader) # skip header row
+        for row in reader:
+            evidence.append(get_row_data(row))
+            labels.append(BOOL_STRING_TO_NUMBER[row[17]])
+    breakpoint()
+    return (evidence, labels)
 
 
 def train_model(evidence, labels):
