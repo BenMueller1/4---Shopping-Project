@@ -121,7 +121,8 @@ def train_model(evidence, labels):
     Given a list of evidence lists and a list of labels, return a
     fitted k-nearest neighbor model (k=1) trained on the data.
     """
-    classifier = KNeighborsClassifier(n_neighbors=1)
+    k = 1
+    classifier = KNeighborsClassifier(n_neighbors=k)
     classifier.fit(evidence, labels)
     return classifier
 
@@ -143,22 +144,14 @@ def evaluate(labels, predictions):
     """
     correct_positive_predictions = 0
     correct_negative_predictions = 0
-    incorrect_positive_predictions = 0
-    incorrect_negative_predictions = 0 
     actual_positive_label_count = labels.count(1)
     actual_negative_label_count = labels.count(0)
 
     for actual_value, predicted_value in zip(labels, predictions):
-        if actual_value == 1:
-            if actual_value == predicted_value:
-                correct_positive_predictions += 1
-            else:
-                incorrect_positive_predictions += 1
-        else:
-            if actual_value == predicted_value:
-                correct_negative_predictions += 1
-            else:
-                incorrect_negative_predictions += 1
+        if actual_value == 1 and actual_value == predicted_value:
+            correct_positive_predictions += 1
+        elif actual_value == 0 and actual_value == predicted_value:
+            correct_negative_predictions += 1
     
     sensitivity = correct_positive_predictions / actual_positive_label_count
     specificity = correct_negative_predictions / actual_negative_label_count
