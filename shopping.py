@@ -113,7 +113,6 @@ def load_data(filename):
         for row in reader:
             evidence.append(get_row_data(row))
             labels.append(BOOL_STRING_TO_NUMBER[row[17]])
-    breakpoint()
     return (evidence, labels)
 
 
